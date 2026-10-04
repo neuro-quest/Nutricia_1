@@ -2,410 +2,520 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Формула Восстановления — набросок</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEE7F2">
+<title>НейроКвест — Nutricia</title>
 <style>
   :root{
-    --bg:#EEE7F2; --page:#E4DCEA; --primary:#A4528F; --primary-d:#8A3F77;
-    --soft:#E2CCDF; --ink:#141414; --muted:#6B6170; --card:#fff;
-    --gold1:#FFE8A3; --gold2:#F2C14E; --gold3:#C98A12;
-    --silver1:#F3F3F8; --silver2:#C9CAD6;
+    --bg:#F7F3FC; --primary:#6D2E8C; --primary-d:#55217A; --soft:#EFE6F8; --line:#DDCBEE;
+    --ink:#17141C; --muted:#6B6378; --card:#fff;
+    --gold1:#FBE7AC; --gold2:#E2B443; --gold-ink:#6B4600;
+    --silver1:#F4F5F9; --silver2:#C9CEDC; --silver-ink:#3B4252;
     --ok:#2E8B57; --err:#C0392B;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--page);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);}
-  .wrap{display:flex;gap:24px;justify-content:center;align-items:flex-start;padding:24px 16px;flex-wrap:wrap}
-  .phone{width:390px;max-width:100%;min-height:844px;background:var(--bg);border-radius:36px;box-shadow:0 10px 40px rgba(80,40,90,.18);padding:28px 18px 24px;display:flex;flex-direction:column;position:relative;overflow:hidden}
-  .logo{height:44px;width:128px;border:1.5px dashed #9b7fb0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#7a5f8e;margin-bottom:18px}
-  /* score bar */
-  .score{margin-bottom:18px}
-  .score-top{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:6px}
-  .score-top b{font-size:22px;color:var(--primary)}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;min-height:100dvh;
+    display:flex;flex-direction:column;padding:16px 16px calc(16px + env(safe-area-inset-bottom));}
+  .logo{height:46px;margin-bottom:12px;display:flex;align-items:center}
+  .logo img{height:100%;width:auto}
+  .logo .ph{height:46px;padding:0 14px;border:1.5px dashed #9B7FB0;border-radius:8px;
+    display:flex;align-items:center;font-size:12px;color:#7A5F8E}
+  /* прогресс */
+  .score{margin-bottom:16px}
+  .score-top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
+  .score-top b{font-size:24px;color:var(--primary)}
   .bar{position:relative;height:10px;background:#fff;border-radius:6px}
-  .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,var(--primary),#C98BB9);transition:width .5s}
+  .bar-fill{position:absolute;inset:0 auto 0 0;border-radius:6px;
+    background:linear-gradient(90deg,var(--primary),#B455B0);transition:width .5s}
   .mark{position:absolute;top:-4px;width:2px;height:18px;background:var(--primary-d)}
-  .mark-l{position:absolute;top:18px;font-size:10px;color:var(--muted);transform:translateX(calc(-100% - 6px));white-space:nowrap}
+  .mark-l{position:absolute;top:16px;display:flex;align-items:center;gap:4px;
+    font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;transform:translateX(-50%)}
   .mark-l.end{transform:translateX(-100%)}
-  .content{flex:1;display:flex;flex-direction:column}
-  h2{font-size:17px;margin:6px 0 10px}
-  p{font-size:15px;line-height:1.4;margin:0 0 12px}
-  .small{font-size:12px;color:var(--muted)}
-  ol{padding-left:20px;margin:0 0 12px;font-size:15px;line-height:1.4}
-  .btn{display:block;width:100%;border:0;border-radius:20px;padding:20px;font-size:22px;background:var(--soft);color:var(--ink);cursor:pointer;margin-top:12px;font-family:inherit}
-  .btn.primary{background:var(--primary);color:#fff;font-weight:700;font-size:20px}
-  .btn:disabled{opacity:.45;cursor:default}
-  .btn.link{background:none;font-size:15px;padding:10px;color:var(--primary-d)}
-  .spacer{flex:1}
-  .input{width:100%;border:0;border-radius:18px;background:#fff;padding:22px 18px;font-size:17px;font-family:inherit;margin:6px 0}
-  textarea.input{min-height:100px;resize:vertical}
-  .msg{font-size:14px;margin:6px 2px;min-height:18px}
+  .mark-l svg{width:17px;height:17px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .mark-l.silver svg{stroke:#8E95A8} .mark-l.silver.got{stroke:#5E6678;color:#5E6678}
+  .mark-l.gold svg{stroke:#D3A43A} .mark-l.gold.got{stroke:#B98A1E;color:#8A6400}
+  .marks{height:24px}
+  main{flex:1;display:flex;flex-direction:column}
+  h1{font-size:19px;margin:0 0 14px}
+  h2{font-size:17px;margin:0 0 10px}
+  p{font-size:16px;line-height:1.45;margin:0 0 14px}
+  .small{font-size:13px;color:var(--muted);line-height:1.35}
+  ol{padding-left:22px;margin:0 0 14px;font-size:16px;line-height:1.45}
+  ol li{margin-bottom:6px}
+  .spacer{flex:1;min-height:16px}
+  .badge{align-self:flex-end;order:-1;margin:0 0 4px 12px;background:var(--primary);color:#fff;border-radius:16px;
+    padding:8px 14px;font-weight:700;font-size:16px;text-align:center;line-height:1.15;white-space:nowrap}
+  .badge.gold{background:linear-gradient(135deg,var(--gold1),var(--gold2));color:var(--gold-ink)}
+  .btn{display:block;width:100%;border:1.5px solid var(--line);border-radius:18px;padding:17px;font-size:19px;
+    background:#fff;color:var(--primary-d);font-family:inherit;cursor:pointer;margin-top:10px;font-weight:600}
+  .btn.primary{background:linear-gradient(135deg,var(--primary),#9B40A6);border-color:transparent;
+    color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(109,46,140,.28)}
+  .btn:disabled{opacity:.5}
+  .row{display:flex;gap:10px}
+  .row .btn{margin-top:10px}
+  .input{width:100%;border:0;border-radius:18px;background:#fff;padding:22px 18px;font-size:17px;
+    font-family:inherit;color:var(--ink);margin:4px 0}
+  textarea.input{min-height:130px;resize:vertical;line-height:1.4}
+  .msg{font-size:14px;margin:8px 2px;min-height:18px}
   .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
-  /* hub cards */
+  /* задания */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .card{background:var(--card);border-radius:20px;padding:14px;cursor:pointer;position:relative;border:0;text-align:left;font-family:inherit;color:inherit;display:flex;flex-direction:column;gap:6px;min-height:150px;transition:transform .15s}
-  .card:active{transform:scale(.98)}
-  .card .ico{width:40px;height:40px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center}
-  .card .ico svg{width:24px;height:24px;stroke:var(--primary-d)}
+  .card{background:var(--card);border:0;border-radius:20px;padding:14px;text-align:left;font-family:inherit;
+    color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:148px;position:relative}
+  .card .ico{width:40px;height:40px;border-radius:12px;background:var(--soft);
+    display:flex;align-items:center;justify-content:center}
+  .card .ico svg{width:24px;height:24px;stroke:var(--primary-d);fill:none;stroke-width:1.8;stroke-linecap:round}
   .card .t{font-weight:700;font-size:15px;line-height:1.2}
   .card .st{font-size:12px;color:var(--muted);margin-top:auto}
-  .pts{position:absolute;top:12px;right:12px;background:var(--primary);color:#fff;font-weight:700;font-size:13px;border-radius:12px;padding:4px 9px}
-  .card.done{opacity:.6}
+  .pts{position:absolute;top:12px;right:12px;background:var(--primary);color:#fff;font-weight:700;
+    font-size:13px;border-radius:12px;padding:4px 9px}
+  .card.done{opacity:.62}
   .card.done .pts{background:var(--ok)}
-  .card.closed{filter:grayscale(1);opacity:.55}
-  .card.gold{grid-column:1/-1;min-height:170px;background:linear-gradient(135deg,var(--gold1),var(--gold2) 55%,var(--gold3));box-shadow:0 6px 22px rgba(201,138,18,.45)}
-  .card.gold .ico{background:rgba(255,255,255,.55)} .card.gold .ico svg{stroke:#7a4f00}
-  .card.gold .pts{background:#7a4f00;font-size:16px;padding:6px 12px}
-  .card.gold .st{color:#5a3a00;font-weight:600;font-size:13px}
-  .card.gold .tag{font-size:11px;font-weight:800;letter-spacing:.08em;color:#7a4f00}
+  .card.gold{grid-column:1/-1;min-height:166px;
+    background:linear-gradient(135deg,var(--gold1),var(--gold2));box-shadow:0 6px 20px rgba(227,178,60,.5)}
+  .card.gold .ico{background:rgba(255,255,255,.6)} .card.gold .ico svg{stroke:var(--gold-ink)}
+  .card.gold .pts{background:var(--gold-ink);font-size:15px}
+  .card.gold .st{color:#5A3A00;font-weight:600;font-size:13px}
+  .card .tag{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold-ink)}
   .card.gold.live{animation:pulse 1.6s infinite}
-  @keyframes pulse{0%,100%{box-shadow:0 6px 22px rgba(201,138,18,.45)}50%{box-shadow:0 6px 34px rgba(201,138,18,.95)}}
-  .card.silver{background:linear-gradient(135deg,var(--silver1),var(--silver2))}
-  .card.silver .tag{font-size:11px;font-weight:800;letter-spacing:.08em;color:#55566a}
-  .card.silver.live{animation:pulse2 1.6s infinite}
-  @keyframes pulse2{0%,100%{box-shadow:0 0 0 rgba(120,120,150,0)}50%{box-shadow:0 0 22px rgba(120,120,150,.8)}}
+  @keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(227,178,60,.5)}50%{box-shadow:0 6px 32px rgba(227,178,60,.95)}}
+  .card.closed{filter:grayscale(1);opacity:.55}
   .prizebox{background:#fff;border-radius:20px;padding:16px;margin-top:14px;display:flex;gap:12px;align-items:center}
-  .prizebox svg{width:36px;height:36px;stroke:var(--primary);flex:none}
-  .pid{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
-  .q{background:#fff;border-radius:18px;padding:14px;margin-bottom:10px}
-  .q .qt{font-weight:600;font-size:14px;margin-bottom:8px}
-  .opt{display:inline-block;border:1.5px solid var(--soft);border-radius:12px;padding:8px 12px;margin:3px 4px 3px 0;font-size:14px;cursor:pointer;background:#fff;font-family:inherit}
-  .opt.sel{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .opt.wrong{border-color:var(--err)}
-  .stars button{font-size:30px;background:none;border:0;cursor:pointer;color:#ccc;padding:0 2px}
-  .stars button.on{color:var(--gold2)}
-  .back{background:none;border:0;color:var(--primary-d);font-size:15px;padding:0;margin-bottom:10px;cursor:pointer;font-family:inherit;text-align:left}
-  .hero{border-radius:20px;padding:16px;margin-bottom:14px}
-  .hero.gold{background:linear-gradient(135deg,var(--gold1),var(--gold2))}
-  .hero.silver{background:linear-gradient(135deg,var(--silver1),var(--silver2))}
-  .modal{position:absolute;inset:0;background:rgba(30,10,40,.45);display:flex;align-items:flex-end}
-  .sheet{background:#fff;width:100%;border-radius:24px 24px 0 0;padding:20px}
-  .mock-form{border:1.5px dashed #bbb;border-radius:12px;padding:14px;font-size:13px;color:#555;margin:10px 0}
-  .toast{position:absolute;left:50%;top:90px;transform:translateX(-50%);background:var(--ok);color:#fff;border-radius:14px;padding:10px 16px;font-weight:700;font-size:15px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  .prizebox svg{width:34px;height:34px;flex:none;stroke:var(--primary);fill:none;stroke-width:1.8;stroke-linecap:round}
+  .prizebox.win{background:linear-gradient(135deg,var(--gold1),var(--gold2))}
+  .prizebox.win svg{stroke:var(--gold-ink)}
+  .pid{font-size:11px;color:var(--muted);text-align:center;margin-top:12px}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid #fff;border-radius:18px;
+    padding:16px;font-size:16px;font-family:inherit;color:inherit;cursor:pointer;margin-bottom:10px;line-height:1.35}
+  .opt.sel{border-color:var(--primary)}
+  /* плашки призов */
+  .tile{display:flex;align-items:center;gap:14px;border-radius:20px;padding:16px;margin-bottom:12px}
+  .tile .ic{width:48px;height:48px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.55)}
+  .tile .ic svg{width:28px;height:28px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tile .n{font-size:13px;font-weight:800;letter-spacing:.06em;opacity:.85}
+  .tile .v{font-size:17px;font-weight:700;line-height:1.2}
+  .tile.silver{background:linear-gradient(135deg,var(--silver1),var(--silver2));color:var(--silver-ink);
+    box-shadow:0 4px 14px rgba(120,130,160,.25)}
+  .tile.silver .ic svg{stroke:var(--silver-ink)}
+  .tile.gold{background:linear-gradient(135deg,var(--gold1),var(--gold2));color:var(--gold-ink);
+    box-shadow:0 6px 18px rgba(226,180,67,.45)}
+  .tile.gold .ic svg{stroke:var(--gold-ink)}
+  .toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:var(--ok);color:#fff;
+    border-radius:14px;padding:12px 18px;font-weight:700;font-size:16px;opacity:0;transition:opacity .3s;
+    pointer-events:none;z-index:9}
   .toast.show{opacity:1}
-  /* demo panel */
-  .panel{width:300px;max-width:100%;background:#fff;border-radius:18px;padding:16px;font-size:13px;line-height:1.4}
-  .panel h3{margin:0 0 8px;font-size:15px}
-  .panel button{display:block;width:100%;margin:5px 0;padding:8px;border-radius:10px;border:1px solid #ddd;background:#faf7fb;cursor:pointer;font-family:inherit;font-size:13px;text-align:left}
-  .panel button.cur{background:var(--primary);color:#fff;border-color:var(--primary)}
-  .panel code{background:#f3eef5;padding:1px 5px;border-radius:5px}
-  .panel hr{border:0;border-top:1px solid #eee;margin:12px 0}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="phone" id="phone"></div>
-
-  <div class="panel">
-    <h3>Демо: время на конгрессе</h3>
-    <div class="small" style="margin-bottom:6px">Только для просмотра наброска — в приложении этой панели нет.</div>
-    <div id="timeBtns"></div>
-    <div id="nowLbl" class="small" style="margin-top:6px"></div>
-    <hr>
-    <h3>Кодовые слова (демо)</h3>
-    Анкета: <code>формула</code><br>
-    Симпозиум: <code>центрис</code><br>
-    Мастер-класс: <code>Nutilis</code> / <code>нутилис</code><br>
-    PIN сотрудника: <code>1234</code><br>
-    Квиз: 12 г · 300 ккал · 13
-    <hr>
-    <button onclick="resetAll()">↺ Начать заново</button>
-  </div>
-</div>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-/* ---------- настройки ---------- */
-const MSK = '+03:00';
-const T = s => new Date(s + MSK);
-const SYMP = {start:T('2026-10-09T13:30:00'), end:T('2026-10-09T16:00:00')}; // по ТЗ: до 16:00
-const MK   = {start:T('2026-10-10T11:00:00'), end:T('2026-10-10T12:00:00')};
-const MAX = 90, LV1 = 60, LV2 = 90;
-const CODES = {anketa:['формула'], symp:['центрис'], mk:['nutilis','нутилис']};
-const PIN = '1234';
+/* ===================================================================
+   НАСТРОЙКИ — здесь меняются ссылки, кодовые слова, баллы и время
+   =================================================================== */
+const CONFIG = {
 
-const TIMES = [
-  ['9.10, 10:00 — утро', '2026-10-09T10:00:00'],
-  ['9.10, 13:00 — скоро симпозиум', '2026-10-09T13:00:00'],
-  ['9.10, 14:10 — идёт симпозиум', '2026-10-09T14:10:00'],
-  ['9.10, 16:30 — симпозиум закрыт', '2026-10-09T16:30:00'],
-  ['10.10, 10:30 — скоро МК', '2026-10-10T10:30:00'],
-  ['10.10, 11:20 — идёт МК', '2026-10-10T11:20:00'],
-  ['10.10, 13:00 — МК закрыт', '2026-10-10T13:00:00'],
-];
-let simNow = T(TIMES[0][1]);
-const now = () => simNow; // в приложении: new Date() или время сервера
+  // Ссылка на анкету (Яндекс Форма). Можно заменить в любой момент.
+  formUrl: 'https://forms.yandex.ru/cloud/6aabe082f47e73091f9bdbba',
+  // Имя скрытого вопроса в форме, куда подставляется ID участника.
+  formPidParam: 'pid',
 
-/* ---------- состояние (в приложении — сохранять в браузере) ---------- */
-let S;
-function fresh(){
-  return {screen:'welcome', pid: Math.random().toString(36).slice(2,6).toUpperCase(),
-    done:{anketa:false,symp:false,quiz:false,taste:false,mk:false},
-    formSent:false, quizSel:{}, quizWrong:false, stars:0, prize:null, msg:'', msgType:''};
+  // Адрес Google Apps Script для отзывов и статистики.
+  // Пока пусто — приложение работает, данные копятся в браузере и уйдут после заполнения.
+  endpoint: 'https://script.google.com/macros/s/AKfycbxV5kqbxSKLDDgFfZ57X-NfYO7RYHWrjDf5Ydh_3bgrFEldi1guhpDuwlK4KskHy1c9fw/exec',
+
+  // Кодовые слова. Регистр, пробелы и раскладка не важны.
+  codes: {
+    anketa: ['Nutridrink'],       // слово из сообщения после анкеты
+    symposium: ['восстановление'] // слово с финального слайда симпозиума
+  },
+
+  // Баллы
+  points: { anketa: 10, quiz: 15, symposium: 30, review: 15 },
+
+  // Призы
+  prizes: [
+    { score: 40, name: 'фирменный картхолдер' },
+    { score: 70, name: 'картхолдер + обложка на документы' }
+  ],
+
+  // Окно приёма кодового слова симпозиума (время московское)
+  symposium: {
+    // false — слово принимается всегда (для проверки).
+    // ПЕРЕД КОНГРЕССОМ поставить true, чтобы работало окно ниже.
+    checkTime: false,
+    start: '2026-10-09T13:15:00+03:00',
+    end:   '2026-10-09T16:00:00+03:00',
+    closedText: 'К сожалению, симпозиум уже завершился, но вы можете узнать больше о нутритивной поддержке на стенде Nutricia.'
+  },
+
+  // Квиз. correct — номер правильного ответа, считая с нуля.
+  quiz: [
+    { n: 1,
+      q: 'Сколько вкусов в линейке Nutridrink 200 мл?',
+      options: ['<b>4</b> - банан, клубника, ваниль и шоколад',
+                '<b>3</b> - банан, клубника, ваниль',
+                '<b>2</b> - банан и ваниль'],
+      correct: 0 },                       // ПРОВЕРИТЬ
+    { n: 2,
+      q: 'Клинически доказано: применение Nutridrink 200 мл способствует снижению частоты инвалидизации...',
+      options: ['в <b>1,5</b> раза', 'в <b>2</b> раза', 'в <b>4</b> раза'],
+      correct: 1 },                       // ПРОВЕРИТЬ
+    { n: 3,
+      q: 'Клинически доказано: применение Nutridrink 200 мл способствует достижению независимости в быту:',
+      options: ['<b>3%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню',
+                '<b>7%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню',
+                '<b>37%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню'],
+      correct: 2 }
+  ],
+
+  // Логотип: положите файл logo.png рядом с index.html. Пока его нет — показывается рамка.
+  logo: 'logo.png'
+};
+/* =================== конец настроек =================== */
+
+const MAX = CONFIG.points.anketa + CONFIG.points.quiz + CONFIG.points.symposium + CONFIG.points.review;
+const HINT = 'Регистр букв, пробелы и раскладка клавиатуры не важны.';
+const QUIZ_HINT = 'Подсказки для вас мы оставили на стенде Nutricia в выставочной зоне.<br>Загляните туда и наши эксперты с удовольствием помогут вам!';
+const norm = s => (s||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/g,'');
+/* раскладка клавиатуры: «Nutridrink», набранное по-русски, тоже засчитывается */
+const RU = 'йцукенгшщзхъфывапролджэячсмитьбю', EN = 'qwertyuiop[]asdfghjkl;\'zxcvbnm,.';
+const swap = (s, from, to) => s.split('').map(c => {
+  const i = from.indexOf(c); return i >= 0 ? to[i] : c;
+}).join('');
+function variants(s){
+  const n = norm(s);
+  return [n, norm(swap(n, RU, EN)), norm(swap(n, EN, RU))];
 }
-S = fresh();
-const PTS = {anketa:15,symp:30,quiz:15,taste:15,mk:15};
-const score = () => Object.keys(S.done).reduce((a,k)=>a+(S.done[k]?PTS[k]:0),0);
-const norm = s => s.trim().toLowerCase().replace(/ё/g,'е').replace(/\s+/g,'');
+
+/* ---------- сохранение прогресса ---------- */
+const KEY = 'neuroquest2026';
+let S;
+function load(){
+  try { S = JSON.parse(localStorage.getItem(KEY)) } catch(e){ S = null }
+  if (!S || !S.pid) {
+    S = { pid: (Date.now().toString(36) + Math.random().toString(36).slice(2,6)).toUpperCase(),
+          started: new Date().toISOString(), screen:'welcome',
+          done:{anketa:false,quiz:false,symposium:false,review:false},
+          quizSel:{}, review:'', prizes:[] };
+    save();
+  }
+  S.msg=''; S.msgType='';
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)) } catch(e){} }
+const score = () => Object.keys(S.done).reduce((a,k)=>a + (S.done[k] ? CONFIG.points[k] : 0), 0);
+
+/* ---------- статистика и отзывы ---------- */
+const QKEY = 'neuroquest2026_queue';
+function queue(){ try { return JSON.parse(localStorage.getItem(QKEY)) || [] } catch(e){ return [] } }
+function track(event, extra){
+  const row = Object.assign({ pid:S.pid, event, score:score(), ts:new Date().toISOString() }, extra||{});
+  const q = queue(); q.push(row);
+  try { localStorage.setItem(QKEY, JSON.stringify(q)) } catch(e){}
+  flush();
+}
+function flush(){
+  if (!CONFIG.endpoint) return;
+  const q = queue(); if (!q.length) return;
+  try { localStorage.setItem(QKEY, '[]') } catch(e){}
+  fetch(CONFIG.endpoint, { method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({rows:q}) })
+    .catch(() => { // не ушло — вернём в очередь
+      try { localStorage.setItem(QKEY, JSON.stringify(q.concat(queue()))) } catch(e){}
+    });
+}
+window.addEventListener('online', flush);
+
+/* ---------- время ---------- */
+const now = () => new Date();
+const SYMP = { start: new Date(CONFIG.symposium.start), end: new Date(CONFIG.symposium.end) };
+function sympState(){
+  if (!CONFIG.symposium.checkTime) return 'live';
+  const n = now();
+  if (n < SYMP.start) return 'soon';
+  if (n <= SYMP.end)  return 'live';
+  return 'closed';
+}
+function left(ms){
+  const m = Math.round(ms/60000), h = Math.floor(m/60), mm = m%60;
+  if (m > 1440) return null;
+  return h ? h + ' ч ' + mm + ' мин' : mm + ' мин';
+}
 
 /* ---------- иконки ---------- */
 const I = {
-  mic:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8M7 9h6M7 12h10"/></svg>',
-  quiz:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>',
-  cup:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M7 3h10l-1.5 17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z"/><path d="M7.5 9h9M14 3l2-2"/></svg>',
-  talk:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
-  gift:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18M12 9v12M12 9c-2-4-6-4-6-1.5S10 9 12 9zm0 0c2-4 6-4 6-1.5S14 9 12 9z"/></svg>',
+  mic:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8M7 9h6M7 12h10"/></svg>',
+  quiz:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>',
+  cup:'<svg viewBox="0 0 24 24"><path d="M7 3h10l-1.5 17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z"/><path d="M7.5 9h9"/></svg>',
+  gift:'<svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18M12 9v12M12 9c-2-4-6-4-6-1.5S10 9 12 9zm0 0c2-4 6-4 6-1.5S14 9 12 9z"/></svg>',
+  card:'<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 14.5h5"/></svg>'
 };
 
-/* ---------- время ---------- */
-const DAYS = ['вс','пн','вт','ср','чт','пт','сб'];
-function fmtLeft(ms){
-  const m = Math.round(ms/60000), h = Math.floor(m/60), mm = m%60;
-  return h ? `${h} ч ${mm} мин` : `${mm} мин`;
+/* ---------- куски разметки ---------- */
+function logo(){
+  return '<div class="logo"><img src="' + CONFIG.logo + '" alt="Nutridrink" ' +
+    'onerror="this.outerHTML=\'<span class=&quot;ph&quot;>логотип Nutridrink</span>\'"></div>';
 }
-function win(w){
-  const n = now();
-  if (n < w.start) return {state:'soon', left:w.start-n};
-  if (n <= w.end)  return {state:'live'};
-  return {state:'closed'};
+function progress(){
+  const sc = score(), p1 = CONFIG.prizes[0].score, p2 = CONFIG.prizes[1].score;
+  return '<div class="score">' +
+    '<div class="score-top"><span>Ваши баллы</span><span><b>' + sc + '</b> / ' + MAX + '</span></div>' +
+    '<div class="bar"><div class="bar-fill" style="width:' + (sc/MAX*100) + '%"></div>' +
+      '<div class="mark" style="left:' + (p1/MAX*100) + '%"></div>' +
+      '<div class="mark-l silver' + (sc >= p1 ? ' got' : '') + '" style="left:' + (p1/MAX*100) + '%">' +
+        I.gift + '<span>' + p1 + '</span></div>' +
+      '<div class="mark-l gold end' + (sc >= p2 ? ' got' : '') + '" style="left:100%">' +
+        I.gift + '<span>' + p2 + '</span></div>' +
+    '</div><div class="marks"></div></div>';
 }
+const home = '<button class="btn" onclick="go(\'hub\')">На главную</button>';
 
 /* ---------- экраны ---------- */
-function header(showScore){
-  let h = '<div class="logo">логотип Nutridrink</div>';
-  if (!showScore) return h;
-  const sc = score();
-  return h + `<div class="score">
-    <div class="score-top"><span>Ваши баллы</span><span><b>${sc}</b> / ${MAX}</span></div>
-    <div class="bar"><div class="bar-fill" style="width:${sc/MAX*100}%"></div>
-      <div class="mark" style="left:${LV1/MAX*100}%"></div><div class="mark-l" style="left:${LV1/MAX*100}%">60 · картхолдер</div>
-      <div class="mark-l end" style="left:100%">90 · главный приз</div>
-    </div></div><div style="height:10px"></div>`;
-}
-
 const screens = {
-welcome: () => header(false) + `<div class="content">
-  <p style="margin-top:20px">Уважаемый коллега!</p>
-  <p>Команда <b>Nutricia</b> рада приветствовать вас на конгрессе «[название конгресса]».</p>
-  <p>Вы точно знаете, что в процессе реабилитации после инсульта важна каждая деталь. Предлагаем сыграть в игру и собрать эффективную <b>«Формулу Восстановления»</b> для ваших пациентов.</p>
-  <p style="margin-top:8px"><b>Как играть:</b></p>
-  <ol>
-    <li>выполняйте задания <b>9 и 10 октября в любом порядке</b></li>
-    <li>за каждое задание получайте <b>баллы</b></li>
-    <li><b>60 баллов</b> — картхолдер, <b>90 баллов</b> — главный приз</li>
-    <li>каждый участник получит электронный <b>Справочник по продуктам Nutricia</b></li>
-  </ol>
-  <p>⭐ <b>Супер-задание</b> — 30 баллов, только 9 октября с 13:30.</p>
-  <div class="spacer"></div>
-  <button class="btn" onclick="go('anketa')">Начать</button></div>`,
 
-anketa: () => header(true) + `<div class="content">
-  <h2>Разминка: анкета · +15 баллов</h2>
-  <p>Ответьте на несколько вопросов — после отправки вы увидите кодовое слово. Анкета открывает остальные задания.</p>
-  <button class="btn primary" onclick="openForm()">Заполнить анкету</button>
-  <p class="small" style="margin-top:14px">Кодовое слово из анкеты:</p>
-  <input class="input" id="code" placeholder="Введите кодовое слово" autocomplete="off">
-  <div class="msg ${S.msgType}">${S.msg}</div>
-  <div class="spacer"></div>
-  <button class="btn" onclick="checkCode('anketa')">Далее</button></div>`,
+welcome: () => logo() + '<main>' +
+  '<p>Уважаемый коллега!</p>' +
+  '<p>Команда <b>Nutricia</b> рада приветствовать вас на “Нейроконгрессе-2026”.</p>' +
+  '<p>Пройдите НейроКвест и узнайте, почему нутритивная терапия - неотъемлемый компонент восстановления после инсульта.</p>' +
+  '<p><b>Как играть:</b></p>' +
+  '<ol><li>в течение дня выполните <b>задания</b></li>' +
+  '<li>каждое выполненное задание принесет вам <b>призовые баллы</b></li>' +
+  '<li>обменяйте баллы на <b>призы на стенде Nutricia</b></li>' +
+  '<li>каждый участник получит электронную версию <b>Справочника по продуктам Nutricia.</b></li></ol>' +
+  '<div class="tile silver"><span class="ic">' + I.card + '</span>' +
+    '<span><span class="n">' + CONFIG.prizes[0].score + ' БАЛЛОВ</span>' +
+    '<div class="v">' + CONFIG.prizes[0].name + '</div></span></div>' +
+  '<div class="tile gold"><span class="ic">' + I.gift + '</span>' +
+    '<span><span class="n">' + CONFIG.prizes[1].score + ' БАЛЛОВ</span>' +
+    '<div class="v">' + CONFIG.prizes[1].name + '</div></span></div>' +
+  '<div class="spacer"></div>' +
+  '<button class="btn" onclick="start()">Начать игру!</button></main>',
+
+anketa: () => logo() + progress() + '<main>' +
+  '<span class="badge">' + CONFIG.points.anketa + '<br>баллов</span>' +
+  '<h2>Разминка. Знакомство</h2>' +
+  '<p>Пожалуйста, ответьте на несколько вопросов анкеты.<br>' +
+  'После отправки анкеты вы увидите кодовое слово.<br>' +
+  'Анкета открывает остальные задания.</p>' +
+  '<button class="btn primary" onclick="openForm()">Заполнить анкету</button>' +
+  '<div class="spacer"></div>' +
+  '<input class="input" id="code" placeholder="Введите кодовое слово" autocomplete="off" autocapitalize="off">' +
+  '<div class="small">' + HINT + '</div>' +
+  '<div class="msg ' + S.msgType + '">' + S.msg + '</div>' +
+  '<button class="btn" onclick="checkCode(\'anketa\')">Далее</button></main>',
 
 hub: () => {
-  const sw = win(SYMP), mw = win(MK);
-  let symSt, symCls = 'card gold';
-  if (S.done.symp) { symSt = '✓ Выполнено · +30'; }
-  else if (sw.state==='soon') symSt = sw.left > 864e5 ? '9 октября (пт) · 13:30–15:00 · зал «[уточнить]»' : `⏳ Начнётся через ${fmtLeft(sw.left)} · зал «[уточнить]»`;
-  else if (sw.state==='live') { symSt = '🔴 Идёт сейчас · кодовое слово на финальном слайде'; symCls += ' live'; }
-  else { symSt = 'Время вышло'; symCls += ' closed'; }
+  const st = sympState();
+  let sympSt, sympCls = 'card gold';
+  if (S.done.symposium) { sympSt = '✓ Выполнено'; sympCls += ' done'; }
+  else if (!CONFIG.symposium.checkTime) { sympSt = '09 октября (пт) · 13:15–15:45 · зал «Пушкин»'; }
+  else if (st === 'soon') {
+    const l = left(SYMP.start - now());
+    sympSt = l ? '⏳ Начнётся через ' + l + ' · зал «Пушкин»' : '09 октября (пт) · 13:15–15:45 · зал «Пушкин»';
+  }
+  else if (st === 'live') { sympSt = '🔴 Идёт сейчас · зал «Пушкин»'; sympCls += ' live'; }
+  else { sympSt = 'Время вышло'; sympCls += ' closed'; }
 
-  let mkSt, mkCls = 'card silver';
-  if (S.done.mk) { mkSt = '✓ +15'; mkCls += ' done'; }
-  else if (mw.state==='soon') mkSt = mw.left > 864e5 ? '10.10 в 11:00' : `⏳ через ${fmtLeft(mw.left)}`;
-  else if (mw.state==='live') { mkSt = '🔴 Идёт сейчас'; mkCls += ' live'; }
-  else { mkSt = 'Время вышло'; mkCls += ' closed'; }
+  const card = (key, cls, ico, title, st2, tag) =>
+    '<button class="' + cls + (S.done[key] && cls.indexOf('done') < 0 ? ' done' : '') + '" onclick="go(\'' + key + '\')">' +
+    '<span class="pts">' + (S.done[key] ? '✓ ' : '+') + CONFIG.points[key] + '</span>' +
+    (tag ? '<span class="tag">' + tag + '</span>' : '') +
+    '<span class="ico">' + ico + '</span><span class="t">' + title + '</span>' +
+    '<span class="st">' + st2 + '</span></button>';
 
-  const c = (k,cls,ico,title,st,tag='') => `<button class="${cls}${S.done[k]&&!cls.includes('done')&&!cls.includes('gold')?' done':''}" onclick="go('${k}')">
-    <span class="pts">${S.done[k]?'✓ ':'+'}${PTS[k]}</span>
-    ${tag?`<span class="tag">${tag}</span>`:''}
-    <span class="ico">${ico}</span><span class="t">${title}</span><span class="st">${st}</span></button>`;
+  const sc = score(), p1 = CONFIG.prizes[0], p2 = CONFIG.prizes[1];
+  let prize;
+  if (sc >= p2.score) prize = '<div class="prizebox win">' + I.gift +
+      '<div><b>Ваш приз: ' + p2.name + '</b><div class="small">Покажите этот экран сотруднику на стенде Nutricia</div></div></div>';
+  else if (sc >= p1.score) prize = '<div class="prizebox win">' + I.gift +
+      '<div><b>Ваш приз: ' + p1.name + '</b><div class="small">До следующего приза (' + p2.name + ') — ' + (p2.score - sc) + ' баллов</div></div></div>';
+  else prize = '<div class="prizebox">' + I.gift +
+      '<div><b>До приза «' + p1.name + '» — ' + (p1.score - sc) + ' баллов</b><div class="small">Задания можно выполнять в любом порядке</div></div></div>';
 
-  const sc = score();
-  const prize = S.prize ? `<div class="prizebox">${I.gift}<div><b>Приз получен</b><div class="small">${S.prize}</div></div></div>`
-    : sc >= LV1 ? `<button class="btn primary" onclick="go('prize')">🎁 Получить приз</button>`
-    : `<div class="prizebox">${I.gift}<div><b>До картхолдера — ${LV1-sc} баллов</b><div class="small">Выполняйте задания в любом порядке</div></div></div>`;
-
-  return header(true) + `<div class="content">
-    <div class="grid">
-      ${c('symp',symCls,I.mic,'Посетите симпозиум Nutricia',symSt,'★ СУПЕР-ЗАДАНИЕ')}
-      ${c('quiz','card',I.quiz,'Квиз о продуктах', S.done.quiz?'Выполнено':'Подсказки — на стенде')}
-      ${c('taste','card',I.cup,'Отзыв о дегустации', S.done.taste?'Выполнено':'Стенд Nutricia')}
-      ${c('mk',mkCls,I.talk,'Мастер-класс логопедов',mkSt,'10 ОКТЯБРЯ')}
-      <div class="card" style="cursor:default;background:transparent;border:1.5px dashed #c9b6d4;justify-content:center;align-items:center;text-align:center">
-        <span class="small">Место для доп. задания<br>(робособака, ролик)</span></div>
-    </div>
-    ${prize}
-    <div class="pid">ID участника: ${S.pid}</div></div>`;
+  return logo() + progress() + '<main><div class="grid">' +
+    card('symposium', sympCls, I.mic, 'Посетите симпозиум Nutricia', sympSt, '★ СУПЕР-ЗАДАНИЕ') +
+    card('quiz', 'card', I.quiz, 'Квиз о продуктах', S.done.quiz ? 'Выполнено' : 'Подсказки — на стенде') +
+    card('review', 'card', I.cup, 'Поделитесь мнением', S.done.review ? 'Выполнено' : 'Стенд Nutricia') +
+    '</div>' + prize +
+    '<div class="pid">ID участника: ' + S.pid + '</div><div class="spacer"></div></main>';
 },
 
-symp: () => {
-  const w = win(SYMP);
-  let body;
-  if (S.done.symp) body = `<p class="msg ok">✓ Супер-задание выполнено! +30 баллов</p>`;
-  else if (w.state==='closed') body = `<p>К сожалению, симпозиум уже завершился, но вы можете узнать больше о нутритивной поддержке на стенде Nutricia.</p>`;
-  else body = `
-    ${w.state==='soon' ? `<p><b>⏳ Начнётся через ${fmtLeft(w.left)}</b></p><p class="small">Поле для слова откроется в 13:30.</p>`
-      : `<p><b>🔴 Симпозиум идёт.</b> Кодовое слово появится на одном из финальных слайдов.</p>`}
-    <input class="input" id="code" placeholder="Кодовое слово с симпозиума" ${w.state==='soon'?'disabled':''} autocomplete="off">
-    <div class="msg ${S.msgType}">${S.msg}</div>`;
-  return header(true) + `<div class="content">
-    <button class="back" onclick="go('hub')">← Все задания</button>
-    <div class="hero gold">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#7a4f00">★ СУПЕР-ЗАДАНИЕ · +30 БАЛЛОВ</div>
-      <h2>Нутритивная терапия как базис успешной реабилитации после инсульта: от клинических рекомендаций к экономической эффективности</h2>
-      <p style="margin:0">9 октября (пт) · <b>13:30–15:00</b> · зал «[уточнить]»</p>
-    </div>
-    ${body}
-    <div class="spacer"></div>
-    ${(!S.done.symp && w.state==='live') ? `<button class="btn" onclick="checkCode('symp')">Получить баллы</button>` : `<button class="btn" onclick="go('hub')">К заданиям</button>`}
-  </div>`;
+/* --- квиз --- */
+quiz: () => logo() + progress() + '<main>' +
+  '<span class="badge">' + CONFIG.points.quiz + '<br>баллов</span>' +
+  '<h2>Квиз о продуктах</h2>' +
+  (S.done.quiz
+    ? '<p class="msg ok">✓ Квиз пройден. Вам зачислено ' + CONFIG.points.quiz + ' призовых баллов.</p>'
+    : '<p>Время квиза!<br>Предлагаем вам ответить на несколько вопросов.</p>' +
+      '<p>Подсказки для вас мы оставили на стенде Nutricia в выставочной зоне.</p>' +
+      '<p>Загляните туда и наши эксперты с удовольствием помогут вам узнать больше о нутритивной поддержке и ее роли в реабилитации после инсульта.</p>') +
+  '<div class="spacer"></div>' +
+  (S.done.quiz ? home
+    : '<div class="row">' + home + '<button class="btn" onclick="go(\'q0\')">Далее</button></div>') +
+  '</main>',
+
+quizOk: () => logo() + progress() + '<main><h2>Квиз о продуктах</h2>' +
+  '<p>Вы блестяще справились с вопросами!</p>' +
+  '<p>Вам зачислено <b>' + CONFIG.points.quiz + ' призовых баллов.</b></p>' +
+  '<div class="spacer"></div>' + home + '</main>',
+
+quizFail: () => logo() + progress() + '<main><h2>Квиз о продуктах</h2>' +
+  '<p>Похоже, один из ответов был выбран неверно.</p>' +
+  '<p>Попробуйте еще раз. Вы можете воспользоваться помощью наших экспертов на стенде!</p>' +
+  '<div class="spacer"></div>' +
+  '<button class="btn" onclick="go(\'q0\')">Вернуться к вопросам</button>' + home + '</main>',
+
+/* --- симпозиум --- */
+symposium: () => {
+  const st = sympState();
+  if (S.done.symposium) return logo() + progress() + '<main><h2>Супер!</h2>' +
+    '<p>Спасибо, что посетили симпозиум Nutricia!</p>' +
+    '<p>Вам зачислено <b>' + CONFIG.points.symposium + ' призовых баллов.</b></p>' +
+    '<div class="spacer"></div>' + home + '</main>';
+  if (st === 'closed') return logo() + progress() + '<main>' +
+    '<h2>Посетите симпозиум Nutricia</h2><p>' + CONFIG.symposium.closedText + '</p>' +
+    '<div class="spacer"></div>' + home + '</main>';
+  return logo() + progress() + '<main>' +
+    '<span class="badge gold">' + CONFIG.points.symposium + '<br>баллов</span>' +
+    '<h2>Посетите симпозиум Nutricia</h2>' +
+    '<p><b>«Нутритивная терапия как базис успешной реабилитации после инсульта: от клинических рекомендаций к экономической эффективности»</b></p>' +
+    '<p>09 октября (пт)<br><b>13:15-15:45</b><br>Зал «Пушкин»</p>' +
+    '<p>Кодовое слово появится на одном из финальных слайдов, следите внимательно!</p>' +
+    '<div class="spacer"></div>' +
+    '<div class="row">' + home + '<button class="btn" onclick="go(\'sympCode\')">Далее</button></div></main>';
 },
 
-quiz: () => {
-  const Q = [
-    ['Сколько белка в 1 упаковке Нутридринк 200 мл?', ['6 г','12 г','20 г'], 1],
-    ['Какова энергетическая ценность 1 упаковки?', ['150 ккал','200 ккал','300 ккал'], 2],
-    ['Сколько витаминов в 1 упаковке?', ['5','13','20'], 1],
-  ];
-  window._Q = Q;
-  if (S.done.quiz) return header(true) + `<div class="content"><button class="back" onclick="go('hub')">← Все задания</button>
-    <p class="msg ok">✓ Квиз пройден! +15 баллов</p><div class="spacer"></div><button class="btn" onclick="go('hub')">К заданиям</button></div>`;
-  return header(true) + `<div class="content">
-    <button class="back" onclick="go('hub')">← Все задания</button>
-    <h2>Время квиза! · +15 баллов</h2>
-    <p class="small">Подсказки — на стенде Nutricia в выставочной зоне. Эксперты помогут.</p>
-    ${Q.map((q,i)=>`<div class="q"><div class="qt">${i+1}. ${q[0]}</div>
-      ${q[1].map((o,j)=>`<button class="opt ${S.quizSel[i]===j?'sel':''} ${S.quizWrong&&S.quizSel[i]===j&&j!==q[2]?'wrong':''}" onclick="pick(${i},${j})">${o}</button>`).join('')}</div>`).join('')}
-    <div class="msg ${S.msgType}">${S.msg}</div>
-    <p class="small">Вопросы — пример, формулировки согласовать с медицинским отделом.</p>
-    <div class="spacer"></div>
-    <button class="btn" onclick="checkQuiz()">Проверить</button></div>`;
+sympCode: () => {
+  const st = sympState();
+  return logo() + progress() + '<main><h2>Посетите симпозиум Nutricia</h2>' +
+    (st === 'soon'
+      ? '<p class="small">Кодовое слово можно будет ввести с 13:15.</p>'
+      : '') +
+    '<input class="input" id="code" placeholder="Введите Кодовое слово...." autocomplete="off" autocapitalize="off"' +
+      (st === 'soon' ? ' disabled' : '') + '>' +
+    '<div class="small">' + HINT + '</div>' +
+    '<div class="msg ' + S.msgType + '">' + S.msg + '</div>' +
+    (st === 'live' ? '<button class="btn primary" onclick="checkCode(\'symposium\')">Получить баллы</button>' : '') +
+    '<div class="spacer"></div>' + home + '</main>';
 },
 
-taste: () => {
-  if (S.done.taste) return header(true) + `<div class="content"><button class="back" onclick="go('hub')">← Все задания</button>
-    <p class="msg ok">✓ Спасибо за отзыв! +15 баллов</p><div class="spacer"></div><button class="btn" onclick="go('hub')">К заданиям</button></div>`;
-  return header(true) + `<div class="content">
-    <button class="back" onclick="go('hub')">← Все задания</button>
-    <h2>Отзыв о дегустации · +15 баллов</h2>
-    <p>Продегустируйте продукты на стенде Nutricia и поделитесь впечатлениями.</p>
-    <p class="small">Оценка вкуса</p>
-    <div class="stars">${[1,2,3,4,5].map(n=>`<button class="${S.stars>=n?'on':''}" onclick="S.stars=${n};render()">★</button>`).join('')}</div>
-    <textarea class="input" id="rev" placeholder="Несколько слов о ваших впечатлениях">${S.rev||''}</textarea>
-    <div class="msg ${S.msgType}">${S.msg}</div>
-    <div class="spacer"></div>
-    <button class="btn" onclick="sendReview()">Отправить отзыв</button></div>`;
-},
+/* --- отзыв --- */
+review: () => logo() + progress() + '<main>' +
+  '<span class="badge">' + CONFIG.points.review + '<br>баллов</span>' +
+  '<h2>Поделитесь мнением</h2>' +
+  (S.done.review
+    ? '<p class="msg ok">✓ Спасибо, отзыв сохранён. Вам зачислено ' + CONFIG.points.review + ' призовых баллов.</p>'
+    : '<p>Мы ждем вас на стенде Nutricia!<br>Попробуйте продукты лечебного питания Nutricia и оставьте свой отзыв — нам важно ваше мнение!</p>') +
+  '<div class="spacer"></div>' +
+  (S.done.review ? home
+    : '<div class="row">' + home + '<button class="btn" onclick="go(\'reviewForm\')">Далее</button></div>') +
+  '</main>',
 
-mk: () => {
-  const w = win(MK);
-  let body;
-  if (S.done.mk) body = `<p class="msg ok">✓ Задание выполнено! +15 баллов</p>`;
-  else if (w.state==='closed') body = `<p>К сожалению, мастер-класс уже завершился, но вы можете узнать больше о коррекции дисфагии на стенде Nutricia.</p>`;
-  else body = `${w.state==='soon' ? `<p><b>⏳ Начнётся через ${fmtLeft(w.left)}</b></p><p class="small">Поле для слова откроется в 11:00.</p>`
-      : `<p><b>🔴 Мастер-класс идёт.</b> Кодовое слово — на экране стенда.</p>`}
-    <input class="input" id="code" placeholder="Кодовое слово" ${w.state==='soon'?'disabled':''} autocomplete="off">
-    <div class="msg ${S.msgType}">${S.msg}</div>`;
-  return header(true) + `<div class="content">
-    <button class="back" onclick="go('hub')">← Все задания</button>
-    <div class="hero silver">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#55566a">10 ОКТЯБРЯ · +15 БАЛЛОВ</div>
-      <h2>Мастер-класс логопедов</h2>
-      <p style="margin:0">Стенд Nutricia · <b>11:00</b> · коррекция дисфагии</p>
-    </div>
-    ${body}
-    <div class="spacer"></div>
-    ${(!S.done.mk && w.state==='live') ? `<button class="btn" onclick="checkCode('mk')">Получить баллы</button>` : `<button class="btn" onclick="go('hub')">К заданиям</button>`}
-  </div>`;
-},
+reviewForm: () => logo() + progress() + '<main><h2>Поделитесь мнением</h2>' +
+  '<textarea class="input" id="rev" placeholder="Какой продукт вы попробовали?&#10;Расскажите о ваших впечатлениях!">' + (S.review || '') + '</textarea>' +
+  '<div class="msg ' + S.msgType + '">' + S.msg + '</div>' +
+  '<div class="spacer"></div>' +
+  '<div class="row">' + home + '<button class="btn primary" onclick="sendReview()">Далее</button></div></main>',
 
-prize: () => {
-  const sc = score(), lvl = sc >= LV2 ? 'Главный приз' : 'Картхолдер';
-  const hint = sc < LV2 ? `<p class="small">Приз выдаётся один раз. До главного приза — ${LV2-sc} баллов: можно выполнить оставшиеся задания и вернуться.</p>` : '';
-  return header(true) + `<div class="content">
-    <button class="back" onclick="go('hub')">← Все задания</button>
-    <h2>Поздравляем!</h2>
-    <p>Вы набрали <b>${sc} баллов</b>. Ваш приз: <b>${lvl}</b>.</p>
-    <p>Покажите этот экран сотруднику на стенде Nutricia.</p>
-    <p>Ссылка на электронный <b>Справочник по продуктам Nutricia</b> придёт на email из анкеты.</p>
-    ${hint}
-    <p class="small" style="margin-top:10px">Для сотрудника:</p>
-    <input class="input" id="pin" type="password" inputmode="numeric" placeholder="PIN сотрудника">
-    <div class="msg ${S.msgType}">${S.msg}</div>
-    <div class="spacer"></div>
-    <button class="btn primary" onclick="givePrize('${lvl}')">Приз выдан</button></div>`;
-},
+reviewOk: () => logo() + progress() + '<main><h2>Супер!</h2>' +
+  '<p>Спасибо, что поделились мнением о продуктах Nutricia!</p>' +
+  '<p>Вам зачислено <b>' + CONFIG.points.review + ' призовых баллов.</b></p>' +
+  '<div class="spacer"></div>' + home + '</main>'
 };
 
+/* вопросы квиза — экраны q0, q1, q2 */
+CONFIG.quiz.forEach((q, i) => {
+  screens['q' + i] = () => logo() + progress() + '<main>' +
+    '<h2>Вопрос №' + q.n + '</h2><p>' + q.q + '</p>' +
+    q.options.map((o, j) =>
+      '<button class="opt ' + (S.quizSel[i] === j ? 'sel' : '') + '" onclick="pick(' + i + ',' + j + ')">' + o + '</button>').join('') +
+    '<div class="msg ' + S.msgType + '">' + S.msg + '</div>' +
+    '<div class="spacer"></div><div class="small">' + QUIZ_HINT + '</div>' +
+    '<div class="row">' + home +
+    '<button class="btn" onclick="nextQ(' + i + ')">Далее</button></div></main>';
+});
+
 /* ---------- действия ---------- */
+function render(){
+  if (!screens[S.screen]) S.screen = 'welcome';
+  document.getElementById('app').innerHTML = screens[S.screen]();
+  window.scrollTo(0,0);
+}
 function go(s){
-  if (s !== 'anketa' && s !== 'welcome' && !S.done.anketa) s = 'anketa';
-  S.screen = s; S.msg=''; S.msgType=''; S.quizWrong=false; render();
+  if (s !== 'welcome' && s !== 'anketa' && !S.done.anketa) s = 'anketa';
+  S.screen = s; S.msg = ''; S.msgType = ''; save();
+  if (['quiz','symposium','review','hub'].indexOf(s) >= 0) track(s === 'hub' ? 'hub' : 'open_' + s);
+  render();
 }
-function say(t,type){ S.msg=t; S.msgType=type; }
+function start(){ track('start'); go('anketa'); }
+function say(t, type){ S.msg = t; S.msgType = type; }
 function toast(t){
-  const el = document.createElement('div'); el.className='toast'; el.textContent=t;
-  document.getElementById('phone').appendChild(el);
-  requestAnimationFrame(()=>el.classList.add('show'));
-  setTimeout(()=>{el.classList.remove('show'); setTimeout(()=>el.remove(),300)},1600);
-}
-function checkCode(k){
-  const v = norm(document.getElementById('code')?.value || '');
-  if (!v) { say('Введите кодовое слово','err'); return render(); }
-  if (k==='symp' && win(SYMP).state!=='live') return render();
-  if (k==='mk' && win(MK).state!=='live') return render();
-  if (CODES[k].includes(v)) {
-    S.done[k] = true; toast(`+${PTS[k]} баллов`);
-    return go(k==='anketa' ? 'hub' : k);
-  }
-  say('Слово не подошло. Проверьте написание и попробуйте ещё раз.','err'); render();
+  const el = document.getElementById('toast');
+  el.textContent = t; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
 }
 function openForm(){
-  const m = document.createElement('div'); m.className='modal';
-  m.innerHTML = `<div class="sheet"><b>Яндекс Форма (iframe)</b>
-    <div class="mock-form">forms.yandex.ru/cloud/6aabe…?iframe=1&amp;<b>pid=${S.pid}</b><br><br>ФИО · Специальность · Город · Email · Согласие на обработку ПД<br><br>
-    <span id="formRes"></span></div>
-    <button class="btn primary" id="fs">Отправить</button>
-    <button class="btn link" id="fc">Закрыть</button></div>`;
-  document.getElementById('phone').appendChild(m);
-  m.querySelector('#fs').onclick = () => { m.querySelector('#formRes').innerHTML = 'Спасибо! Ваше кодовое слово: <b>ФОРМУЛА</b>'; m.querySelector('#fs').style.display='none'; };
-  m.querySelector('#fc').onclick = () => m.remove();
+  track('open_form');
+  const u = CONFIG.formUrl + (CONFIG.formUrl.indexOf('?') >= 0 ? '&' : '?') + CONFIG.formPidParam + '=' + S.pid;
+  window.open(u, '_blank', 'noopener');
 }
-function pick(i,j){ S.quizSel[i]=j; S.quizWrong=false; say('',''); render(); }
-function checkQuiz(){
-  const Q = window._Q;
-  if (Object.keys(S.quizSel).length < Q.length) { say('Ответьте на все вопросы','err'); return render(); }
-  const ok = Q.every((q,i)=>S.quizSel[i]===q[2]);
-  if (ok) { S.done.quiz = true; toast('+15 баллов'); return go('quiz'); }
-  S.quizWrong = true; say('Есть неточность. Загляните на стенд Nutricia — подсказки на панелях — и попробуйте ещё раз.','err'); render();
+function checkCode(key){
+  const vs = variants(document.getElementById('code').value);
+  if (!vs[0]) { say('Введите кодовое слово', 'err'); return render(); }
+  if (key === 'symposium' && sympState() !== 'live') return render();
+  const ok = CONFIG.codes[key].map(norm).some(c => vs.indexOf(c) >= 0);
+  if (ok) {
+    S.done[key] = true; save();
+    track('done_' + key);
+    checkPrize();
+    toast('+' + CONFIG.points[key] + ' баллов');
+    return go(key === 'anketa' ? 'hub' : 'symposium');
+  }
+  track('wrong_' + key);
+  say('Слово не подошло. Проверьте написание и попробуйте ещё раз.', 'err');
+  render();
+}
+function pick(i, j){ S.quizSel[i] = j; save(); say('', ''); render(); }
+function nextQ(i){
+  if (S.quizSel[i] === undefined) { say('Выберите вариант ответа', 'err'); return render(); }
+  track('quiz_q' + (i+1));
+  if (i < CONFIG.quiz.length - 1) return go('q' + (i+1));
+  const ok = CONFIG.quiz.every((q, k) => S.quizSel[k] === q.correct);
+  if (ok) {
+    S.done.quiz = true; save(); track('done_quiz'); checkPrize();
+    toast('+' + CONFIG.points.quiz + ' баллов');
+    return go('quizOk');
+  }
+  track('quiz_fail'); S.quizSel = {}; save(); go('quizFail');
 }
 function sendReview(){
-  const t = document.getElementById('rev').value.trim(); S.rev = t;
-  if (t.length < 3) { say('Напишите несколько слов о впечатлениях','err'); return render(); }
-  S.done.taste = true; toast('+15 баллов'); go('taste');
+  const t = document.getElementById('rev').value.trim();
+  S.review = t; save();
+  if (t.length < 3) { say('Напишите, пожалуйста, несколько слов', 'err'); return render(); }
+  S.done.review = true; save();
+  track('done_review', { review: t });
+  checkPrize();
+  toast('+' + CONFIG.points.review + ' баллов');
+  go('reviewOk');
 }
-function givePrize(lvl){
-  if (document.getElementById('pin').value !== PIN) { say('Неверный PIN','err'); return render(); }
-  S.prize = `${lvl} · выдан ${now().toLocaleString('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'})}`;
-  go('hub');
+function checkPrize(){
+  const sc = score();
+  CONFIG.prizes.forEach(p => {
+    if (sc >= p.score && S.prizes.indexOf(p.score) < 0) {
+      S.prizes.push(p.score); save(); track('prize_' + p.score);
+      if (p.score === CONFIG.prizes[CONFIG.prizes.length-1].score) track('finish');
+    }
+  });
 }
-function resetAll(){ S = fresh(); render(); }
 
-/* ---------- отрисовка ---------- */
-function render(){
-  const keep = document.getElementById('code')?.value;
-  document.getElementById('phone').innerHTML = screens[S.screen]();
-  if (keep && document.getElementById('code') && S.msgType==='err') document.getElementById('code').value = keep;
-  document.getElementById('timeBtns').innerHTML = TIMES.map(([l,t])=>
-    `<button class="${+T(t)===+simNow?'cur':''}" onclick="simNow=T('${t}');render()">${l}</button>`).join('');
-  document.getElementById('nowLbl').textContent = 'Сейчас (МСК): ' + simNow.toLocaleString('ru-RU',{timeZone:'Europe/Moscow',weekday:'short',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
-}
+/* ---------- старт ---------- */
+load();
+track('open');
 render();
 </script>
 </body>
