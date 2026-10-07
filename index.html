@@ -92,8 +92,12 @@
   .card.gold.locked::after,.card.gold.closed::after{display:none}
   @keyframes shine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
   /* широкие плашки */
-  .wide{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:inherit;color:inherit;
-    background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:14px;margin-top:12px;cursor:pointer}
+  .wide{position:relative;display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:inherit;
+    color:inherit;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:14px;margin-top:12px;cursor:pointer}
+  .wide .pts{top:50%;transform:translateY(-50%)}
+  .wide.accent .pts{background:#fff;color:var(--primary-d)}
+  .wide.done-wide .pts{background:var(--ok)}
+  .wide b{padding-right:52px}
   .wide .ic{width:42px;height:42px;border-radius:13px;flex:none;background:var(--soft);
     display:flex;align-items:center;justify-content:center}
   .wide .ic svg{width:24px;height:24px;fill:none;stroke:var(--primary-d);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -370,8 +374,10 @@ hub: () => {
 
   const anketaTile = S.done.anketa
     ? '<button class="wide done-wide" onclick="go(\'anketa\')"><span class="ic">' + I.pen + '</span>' +
+      '<span class="pts">✓ ' + CONFIG.points.anketa + '</span>' +
       '<span><b>Знакомство. Анкета заполнена</b></span></button>'
     : '<button class="wide accent" onclick="go(\'anketa\')"><span class="ic">' + I.pen + '</span>' +
+      '<span class="pts">+' + CONFIG.points.anketa + '</span>' +
       '<span><b>Знакомство. Заполните анкету</b></span></button>';
 
   return logo() + progress() + '<main>' + anketaTile + '<div class="grid" style="margin-top:12px">' +
@@ -380,7 +386,7 @@ hub: () => {
     card('review', 'card', I.cup, 'Поделитесь мнением', S.done.review ? 'Выполнено' : 'Стенд Nutricia') +
     '</div>' + prize +
     '<button class="wide guide' + (locked ? ' locked' : '') + '" onclick="' + (locked ? 'lockHint()' : 'openGuide()') + '">' +
-      '<span class="ic">' + I.book + '</span><span><b>Скачать справочник по продуктам Нутриция</b>' +
+      '<span class="ic">' + I.gift + '</span><span><b>Скачать справочник по продуктам Nutricia</b>' +
       (locked ? '<div class="small">🔒 Доступно после заполнения анкеты</div>' : '') + '</span></button>' +
     '<div class="pid">ID участника: ' + S.pid + '</div><div class="spacer"></div></main>';
 },
