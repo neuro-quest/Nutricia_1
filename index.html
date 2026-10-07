@@ -83,6 +83,27 @@
   .card.gold.live{animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(227,178,60,.5)}50%{box-shadow:0 6px 32px rgba(227,178,60,.95)}}
   .card.closed{filter:grayscale(1);opacity:.55}
+  .card.locked{filter:grayscale(.85);opacity:.5}
+  .card.locked .pts{background:#9A93A6}
+  /* перелив на супер-задании */
+  .card.gold::after{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;
+    background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.75) 50%,transparent 65%);
+    background-size:300% 100%;animation:shine 3.4s ease-in-out infinite}
+  .card.gold.locked::after,.card.gold.closed::after{display:none}
+  @keyframes shine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
+  /* широкие плашки */
+  .wide{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:inherit;color:inherit;
+    background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:14px;margin-top:12px;cursor:pointer}
+  .wide .ic{width:42px;height:42px;border-radius:13px;flex:none;background:var(--soft);
+    display:flex;align-items:center;justify-content:center}
+  .wide .ic svg{width:24px;height:24px;fill:none;stroke:var(--primary-d);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .wide b{font-size:15px;line-height:1.25;display:block}
+  .wide.accent{background:linear-gradient(135deg,var(--primary),#9B40A6);border-color:transparent;color:#fff;
+    box-shadow:0 6px 16px rgba(109,46,140,.28)}
+  .wide.accent .ic{background:rgba(255,255,255,.22)} .wide.accent .ic svg{stroke:#fff}
+  .wide.accent .small{color:rgba(255,255,255,.85)}
+  .wide.done-wide{opacity:.7}
+  .wide.locked{filter:grayscale(.85);opacity:.55}
   .prizebox{background:#fff;border-radius:20px;padding:16px;margin-top:14px;display:flex;gap:12px;align-items:center}
   .prizebox svg{width:34px;height:34px;flex:none;stroke:var(--primary);fill:none;stroke-width:1.8;stroke-linecap:round}
   .prizebox.win{background:linear-gradient(135deg,var(--gold1),var(--gold2))}
@@ -104,10 +125,14 @@
   .tile.gold{background:linear-gradient(135deg,var(--gold1),var(--gold2));color:var(--gold-ink);
     box-shadow:0 6px 18px rgba(226,180,67,.45)}
   .tile.gold .ic svg{stroke:var(--gold-ink)}
-  .toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:var(--ok);color:#fff;
-    border-radius:14px;padding:12px 18px;font-weight:700;font-size:16px;opacity:0;transition:opacity .3s;
-    pointer-events:none;z-index:9}
-  .toast.show{opacity:1}
+  .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%) scale(.9);background:var(--ok);color:#fff;
+    border-radius:18px;padding:16px 26px;font-weight:800;font-size:22px;opacity:0;
+    transition:opacity .35s, transform .35s cubic-bezier(.2,1.4,.4,1);
+    box-shadow:0 10px 26px rgba(46,139,87,.4);pointer-events:none;z-index:9;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) scale(1)}
+  .conf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;pointer-events:none;z-index:8;
+    animation:fall linear forwards}
+  @keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:.1;transform:translateY(100vh) rotate(720deg)}}
 </style>
 </head>
 <body>
@@ -125,6 +150,9 @@ const CONFIG = {
   // Имя скрытого вопроса в форме, куда подставляется ID участника.
   formPidParam: 'pid',
 
+  // Справочник по продуктам Nutricia (плашка внизу экрана заданий)
+  guideUrl: 'https://drive.google.com/drive/folders/1QDOL7z5uqaZoPXevC9cFcXg2Sp6W2xtt?usp=drive_link',
+
   // Адрес Google Apps Script для отзывов и статистики.
   // Пока пусто — приложение работает, данные копятся в браузере и уйдут после заполнения.
   endpoint: 'https://script.google.com/macros/s/AKfycbxV5kqbxSKLDDgFfZ57X-NfYO7RYHWrjDf5Ydh_3bgrFEldi1guhpDuwlK4KskHy1c9fw/exec',
@@ -132,7 +160,7 @@ const CONFIG = {
   // Кодовые слова. Регистр, пробелы и раскладка не важны.
   codes: {
     anketa: ['Nutridrink'],       // слово из сообщения после анкеты
-    symposium: ['восстановление'] // слово с финального слайда симпозиума
+    symposium: ['Нутритивная терапия'] // слово с финального слайда симпозиума
   },
 
   // Баллы
@@ -141,7 +169,7 @@ const CONFIG = {
   // Призы
   prizes: [
     { score: 40, name: 'фирменный картхолдер' },
-    { score: 70, name: 'картхолдер + обложка на документы' }
+    { score: 70, name: 'фирменный картхолдер и обложка на документы' }
   ],
 
   // Окно приёма кодового слова симпозиума (время московское)
@@ -167,10 +195,8 @@ const CONFIG = {
       options: ['в <b>1,5</b> раза', 'в <b>2</b> раза', 'в <b>4</b> раза'],
       correct: 1 },                       // ПРОВЕРИТЬ
     { n: 3,
-      q: 'Клинически доказано: применение Nutridrink 200 мл способствует достижению независимости в быту:',
-      options: ['<b>3%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню',
-                '<b>7%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню',
-                '<b>37%</b> пациентов, получавших Nutridrink 200 мл, были независимы в быту к 90-му дню'],
+      q: 'Сколько пациентов, получавших Nutridrink, смогли заботиться о себе без посторонней помощи к 90-му дню после инсульта?',
+      options: ['<b>5%</b> пациентов', '<b>20%</b> пациентов', '<b>37%</b> пациентов'],
       correct: 2 }
   ],
 
@@ -180,7 +206,7 @@ const CONFIG = {
 /* =================== конец настроек =================== */
 
 const MAX = CONFIG.points.anketa + CONFIG.points.quiz + CONFIG.points.symposium + CONFIG.points.review;
-const HINT = 'Регистр букв, пробелы и раскладка клавиатуры не важны.';
+const HINT = 'Будьте внимательны при введении кодовых слов, опечатки будут засчитаны как ошибка.';
 const QUIZ_HINT = 'Подсказки для вас мы оставили на стенде Nutricia в выставочной зоне.<br>Загляните туда и наши эксперты с удовольствием помогут вам!';
 const norm = s => (s||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]/g,'');
 /* раскладка клавиатуры: «Nutridrink», набранное по-русски, тоже засчитывается */
@@ -253,7 +279,9 @@ const I = {
   quiz:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>',
   cup:'<svg viewBox="0 0 24 24"><path d="M7 3h10l-1.5 17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z"/><path d="M7.5 9h9"/></svg>',
   gift:'<svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18M12 9v12M12 9c-2-4-6-4-6-1.5S10 9 12 9zm0 0c2-4 6-4 6-1.5S14 9 12 9z"/></svg>',
-  card:'<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 14.5h5"/></svg>'
+  card:'<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 14.5h5"/></svg>',
+  pen:'<svg viewBox="0 0 24 24"><path d="M4 20h16M6 16l10.5-10.5a2.1 2.1 0 1 1 3 3L9 19l-4 1z"/></svg>',
+  book:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M12 8v6m0 0l-2.2-2.2M12 14l2.2-2.2"/></svg>'
 };
 
 /* ---------- куски разметки ---------- */
@@ -280,13 +308,13 @@ const screens = {
 
 welcome: () => logo() + '<main>' +
   '<p>Уважаемый коллега!</p>' +
-  '<p>Команда <b>Nutricia</b> рада приветствовать вас на “Нейроконгрессе-2026”.</p>' +
-  '<p>Пройдите НейроКвест и узнайте, почему нутритивная терапия - неотъемлемый компонент восстановления после инсульта.</p>' +
+  '<p>Команда <b>Nutricia</b> рада приветствовать Вас на “Нейроконгрессе-2026”.</p>' +
+  '<p>Пройдите <b>НейроКвест</b> и узнайте, почему нутритивная терапия - неотъемлемый компонент восстановления после инсульта.</p>' +
   '<p><b>Как играть:</b></p>' +
-  '<ol><li>в течение дня выполните <b>задания</b></li>' +
+  '<ol><li>в течение дня <b>выполните задания</b></li>' +
   '<li>каждое выполненное задание принесет вам <b>призовые баллы</b></li>' +
-  '<li>обменяйте баллы на <b>призы на стенде Nutricia</b></li>' +
-  '<li>каждый участник получит электронную версию <b>Справочника по продуктам Nutricia.</b></li></ol>' +
+  '<li>наибольшее количество баллов Вы получите за <b>посещение симпозиума Nutricia</b></li>' +
+  '<li><b>обменяйте баллы на призы</b> на стенде Nutricia</li></ol>' +
   '<div class="tile silver"><span class="ic">' + I.card + '</span>' +
     '<span><span class="n">' + CONFIG.prizes[0].score + ' БАЛЛОВ</span>' +
     '<div class="v">' + CONFIG.prizes[0].name + '</div></span></div>' +
@@ -294,20 +322,21 @@ welcome: () => logo() + '<main>' +
     '<span><span class="n">' + CONFIG.prizes[1].score + ' БАЛЛОВ</span>' +
     '<div class="v">' + CONFIG.prizes[1].name + '</div></span></div>' +
   '<div class="spacer"></div>' +
-  '<button class="btn" onclick="start()">Начать игру!</button></main>',
+  (S.started2 ? '<button class="btn" onclick="go(\'hub\')">К заданиям</button>'
+              : '<button class="btn" onclick="start()">Начать игру!</button>') + '</main>',
 
 anketa: () => logo() + progress() + '<main>' +
   '<span class="badge">' + CONFIG.points.anketa + '<br>баллов</span>' +
-  '<h2>Разминка. Знакомство</h2>' +
-  '<p>Пожалуйста, ответьте на несколько вопросов анкеты.<br>' +
+  '<h2>Знакомство</h2>' +
+  '<p>Пожалуйста, заполните анкету.<br>' +
   'После отправки анкеты вы увидите кодовое слово.<br>' +
-  'Анкета открывает остальные задания.</p>' +
+  'Введите его в поле ниже и получите первые призовые баллы.</p>' +
   '<button class="btn primary" onclick="openForm()">Заполнить анкету</button>' +
   '<div class="spacer"></div>' +
   '<input class="input" id="code" placeholder="Введите кодовое слово" autocomplete="off" autocapitalize="off">' +
   '<div class="small">' + HINT + '</div>' +
   '<div class="msg ' + S.msgType + '">' + S.msg + '</div>' +
-  '<button class="btn" onclick="checkCode(\'anketa\')">Далее</button></main>',
+  '<div class="row">' + home + '<button class="btn" onclick="checkCode(\'anketa\')">Далее</button></div></main>',
 
 hub: () => {
   const st = sympState();
@@ -321,12 +350,14 @@ hub: () => {
   else if (st === 'live') { sympSt = '🔴 Идёт сейчас · зал «Пушкин»'; sympCls += ' live'; }
   else { sympSt = 'Время вышло'; sympCls += ' closed'; }
 
+  const locked = !S.done.anketa;
   const card = (key, cls, ico, title, st2, tag) =>
-    '<button class="' + cls + (S.done[key] && cls.indexOf('done') < 0 ? ' done' : '') + '" onclick="go(\'' + key + '\')">' +
+    '<button class="' + cls + (S.done[key] && cls.indexOf('done') < 0 ? ' done' : '') + (locked ? ' locked' : '') +
+      '" onclick="' + (locked ? 'lockHint()' : 'go(\'' + key + '\')') + '">' +
     '<span class="pts">' + (S.done[key] ? '✓ ' : '+') + CONFIG.points[key] + '</span>' +
     (tag ? '<span class="tag">' + tag + '</span>' : '') +
     '<span class="ico">' + ico + '</span><span class="t">' + title + '</span>' +
-    '<span class="st">' + st2 + '</span></button>';
+    '<span class="st">' + (locked ? '🔒 Сначала заполните анкету' : st2) + '</span></button>';
 
   const sc = score(), p1 = CONFIG.prizes[0], p2 = CONFIG.prizes[1];
   let prize;
@@ -335,13 +366,22 @@ hub: () => {
   else if (sc >= p1.score) prize = '<div class="prizebox win">' + I.gift +
       '<div><b>Ваш приз: ' + p1.name + '</b><div class="small">До следующего приза (' + p2.name + ') — ' + (p2.score - sc) + ' баллов</div></div></div>';
   else prize = '<div class="prizebox">' + I.gift +
-      '<div><b>До приза «' + p1.name + '» — ' + (p1.score - sc) + ' баллов</b><div class="small">Задания можно выполнять в любом порядке</div></div></div>';
+      '<div><b>До приза «' + p1.name + '» — ' + (p1.score - sc) + ' баллов</b></div></div>';
 
-  return logo() + progress() + '<main><div class="grid">' +
+  const anketaTile = S.done.anketa
+    ? '<button class="wide done-wide" onclick="go(\'anketa\')"><span class="ic">' + I.pen + '</span>' +
+      '<span><b>Знакомство. Анкета заполнена</b></span></button>'
+    : '<button class="wide accent" onclick="go(\'anketa\')"><span class="ic">' + I.pen + '</span>' +
+      '<span><b>Знакомство. Заполните анкету</b></span></button>';
+
+  return logo() + progress() + '<main>' + anketaTile + '<div class="grid" style="margin-top:12px">' +
     card('symposium', sympCls, I.mic, 'Посетите симпозиум Nutricia', sympSt, '★ СУПЕР-ЗАДАНИЕ') +
     card('quiz', 'card', I.quiz, 'Квиз о продуктах', S.done.quiz ? 'Выполнено' : 'Подсказки — на стенде') +
     card('review', 'card', I.cup, 'Поделитесь мнением', S.done.review ? 'Выполнено' : 'Стенд Nutricia') +
     '</div>' + prize +
+    '<button class="wide guide' + (locked ? ' locked' : '') + '" onclick="' + (locked ? 'lockHint()' : 'openGuide()') + '">' +
+      '<span class="ic">' + I.book + '</span><span><b>Скачать справочник по продуктам Нутриция</b>' +
+      (locked ? '<div class="small">🔒 Доступно после заполнения анкеты</div>' : '') + '</span></button>' +
     '<div class="pid">ID участника: ' + S.pid + '</div><div class="spacer"></div></main>';
 },
 
@@ -447,17 +487,42 @@ function render(){
   window.scrollTo(0,0);
 }
 function go(s){
-  if (s !== 'welcome' && s !== 'anketa' && !S.done.anketa) s = 'anketa';
+  if (s !== 'welcome' && s !== 'anketa' && s !== 'hub' && !S.done.anketa) s = 'hub';
   S.screen = s; S.msg = ''; S.msgType = ''; save();
   if (['quiz','symposium','review','hub'].indexOf(s) >= 0) track(s === 'hub' ? 'hub' : 'open_' + s);
   render();
 }
-function start(){ track('start'); go('anketa'); }
+function start(){ S.started2 = true; save(); track('start'); go('hub'); }
 function say(t, type){ S.msg = t; S.msgType = type; }
 function toast(t){
   const el = document.getElementById('toast');
   el.textContent = t; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1800);
+  setTimeout(() => el.classList.remove('show'), 3400);
+  confetti();
+}
+function confetti(){
+  const colors = ['#E2B443','#6D2E8C','#B455B0','#2E8B57','#F7D77A','#9B40A6'];
+  for (let i = 0; i < 46; i++) {
+    const c = document.createElement('div');
+    c.className = 'conf';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (2.2 + Math.random() * 1.4) + 's';
+    c.style.animationDelay = (Math.random() * .5) + 's';
+    if (i % 3 === 0) c.style.borderRadius = '50%';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4200);
+  }
+}
+function lockHint(){
+  const el = document.getElementById('toast');
+  el.textContent = 'Сначала заполните анкету';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function openGuide(){
+  track('open_guide');
+  window.open(CONFIG.guideUrl, '_blank', 'noopener');
 }
 function openForm(){
   track('open_form');
