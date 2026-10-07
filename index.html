@@ -181,7 +181,7 @@ const CONFIG = {
     // false — слово принимается всегда (для проверки).
     // ПЕРЕД КОНГРЕССОМ поставить true, чтобы работало окно ниже.
     checkTime: false,
-    start: '2026-10-09T13:15:00+03:00',
+    start: '2026-10-09T13:45:00+03:00',
     end:   '2026-10-09T16:00:00+03:00',
     closedText: 'К сожалению, симпозиум уже завершился, но вы можете узнать больше о нутритивной поддержке на стенде Nutricia.'
   },
@@ -227,6 +227,11 @@ function variants(s){
 const KEY = 'neuroquest2026';
 let S;
 function load(){
+  // ?reset в адресе — начать игру заново (для проверки)
+  if (/[?&#]reset/.test(location.search + location.hash)) {
+    try { localStorage.removeItem(KEY); localStorage.removeItem('neuroquest2026_queue') } catch(e){}
+    try { history.replaceState(null, '', location.pathname) } catch(e){}
+  }
   try { S = JSON.parse(localStorage.getItem(KEY)) } catch(e){ S = null }
   if (!S || !S.pid) {
     S = { pid: (Date.now().toString(36) + Math.random().toString(36).slice(2,6)).toUpperCase(),
@@ -346,10 +351,10 @@ hub: () => {
   const st = sympState();
   let sympSt, sympCls = 'card gold';
   if (S.done.symposium) { sympSt = '✓ Выполнено'; sympCls += ' done'; }
-  else if (!CONFIG.symposium.checkTime) { sympSt = '09 октября (пт) · 13:15–15:45 · зал «Пушкин»'; }
+  else if (!CONFIG.symposium.checkTime) { sympSt = '09 октября (пт) · 13:45–15:15 · зал «Пушкин»'; }
   else if (st === 'soon') {
     const l = left(SYMP.start - now());
-    sympSt = l ? '⏳ Начнётся через ' + l + ' · зал «Пушкин»' : '09 октября (пт) · 13:15–15:45 · зал «Пушкин»';
+    sympSt = l ? '⏳ Начнётся через ' + l + ' · зал «Пушкин»' : '09 октября (пт) · 13:45–15:15 · зал «Пушкин»';
   }
   else if (st === 'live') { sympSt = '🔴 Идёт сейчас · зал «Пушкин»'; sympCls += ' live'; }
   else { sympSt = 'Время вышло'; sympCls += ' closed'; }
@@ -430,7 +435,7 @@ symposium: () => {
     '<span class="badge gold">' + CONFIG.points.symposium + '<br>баллов</span>' +
     '<h2>Посетите симпозиум Nutricia</h2>' +
     '<p><b>«Нутритивная терапия как базис успешной реабилитации после инсульта: от клинических рекомендаций к экономической эффективности»</b></p>' +
-    '<p>09 октября (пт)<br><b>13:15-15:45</b><br>Зал «Пушкин»</p>' +
+    '<p>09 октября (пт)<br><b>13:45-15:15</b><br>Зал «Пушкин»</p>' +
     '<p>Кодовое слово появится на одном из финальных слайдов, следите внимательно!</p>' +
     '<div class="spacer"></div>' +
     '<div class="row">' + home + '<button class="btn" onclick="go(\'sympCode\')">Далее</button></div></main>';
@@ -440,7 +445,7 @@ sympCode: () => {
   const st = sympState();
   return logo() + progress() + '<main><h2>Посетите симпозиум Nutricia</h2>' +
     (st === 'soon'
-      ? '<p class="small">Кодовое слово можно будет ввести с 13:15.</p>'
+      ? '<p class="small">Кодовое слово можно будет ввести с 13:45.</p>'
       : '') +
     '<input class="input" id="code" placeholder="Введите Кодовое слово...." autocomplete="off" autocapitalize="off"' +
       (st === 'soon' ? ' disabled' : '') + '>' +
